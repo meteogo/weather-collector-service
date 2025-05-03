@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 
 	"github.com/meteogo/config/pkg/config"
 	"github.com/meteogo/logger/pkg/logger"
-	appconfig "github.com/meteogo/weather-collector-service/internal/config"
+	"github.com/meteogo/weather-collector-service/internal/services/weather_collector"
 )
 
 func main() {
@@ -17,5 +16,12 @@ func main() {
 
 	provider := config.NewProvider(".cfg/values.yaml")
 	logger.Info(ctx, "config provider created successfully")
-	logger.Debug(ctx, fmt.Sprintf("will collect weather every %v", provider.GetConfigClient().GetValue(appconfig.WeatherCollectorCronDuration).Duration()))
+
+	collectorConfig, err := weather_collector.NewConfig(provider)
+	if err != nil {
+		panic(err)
+	}
+	collectorService := weather_collector.NewService(collectorConfig, nil, nil)
+
+	_ = collectorService
 }
