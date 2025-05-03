@@ -1,0 +1,3 @@
+weather_collector_cron_duration:
+  type: "duration"
+  value: "1m"
