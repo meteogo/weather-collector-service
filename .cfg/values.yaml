@@ -1,3 +1,60 @@
 weather_collector_cron_duration:
   type: "duration"
   value: "1m"
+reported_cities:
+  type: "string"
+  value: >
+    {
+      "Berlin": {
+        "lat": 52.52,
+        "long": 13.41
+      },
+      "Paris": {
+        "lat": 48.86,
+        "long": 2.35
+      },
+      "London": {
+        "lat": 51.51,
+        "long": -0.13
+      },
+      "Rome": {
+        "lat": 41.90,
+        "long": 12.50
+      },
+      "Madrid": {
+        "lat": 40.42,
+        "long": -3.70
+      },
+      "Amsterdam": {
+        "lat": 52.37,
+        "long": 4.90
+      },
+      "Vienna": {
+        "lat": 48.21,
+        "long": 16.37
+      },
+      "Prague": {
+        "lat": 50.08,
+        "long": 14.42
+      },
+      "Stockholm": {
+        "lat": 59.33,
+        "long": 18.07
+      },
+      "Copenhagen": {
+        "lat": 55.68,
+        "long": 12.57
+      }
+    }
+parameter_names:
+  type: "string"
+  value: >
+    {
+      "temperature": "temperature_2m",
+      "relativeHumidity": "relative_humidity_2m",
+      "windSpeed": "wind_speed_10m",
+      "weatherCode": "weather_code",
+      "cloudCover": "cloud_cover",
+      "precipitation": "precipitation",
+      "visibility": "visibility"
+    }
