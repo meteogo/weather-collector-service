@@ -1,4 +1,4 @@
-package weather_collector
+package weather_service
 
 import (
 	"context"
@@ -85,6 +85,10 @@ func (c *configImpl) updateReportedCities(JSON string) error {
 		})
 	}
 
+	if len(reportedCities) == 0 {
+		return errors.New("size of reported cities can not be zero")
+	}
+
 	c.mu.Lock()
 	defer c.mu.Unlock()
 
@@ -102,6 +106,10 @@ func (c *configImpl) updateMonitoringParams(JSON string) error {
 	monitoringParams := make(MonitoringParamsMap)
 	for k, v := range params {
 		monitoringParams[enums.MonitoringParam(k)] = v
+	}
+
+	if len(monitoringParams) == 0 {
+		return errors.New("size of monitoring params can not be zero")
 	}
 
 	c.mu.Lock()

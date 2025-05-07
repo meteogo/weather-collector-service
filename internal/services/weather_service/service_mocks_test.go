@@ -7,13 +7,13 @@
 //
 
 // Package weather_collector_test is a generated GoMock package.
-package weather_collector_test
+package weather_service_test
 
 import (
 	context "context"
 	reflect "reflect"
 
-	weather_collector "github.com/meteogo/weather-collector-service/internal/services/weather_collector"
+	weather_collector "github.com/meteogo/weather-collector-service/internal/services/weather_service"
 	gomock "go.uber.org/mock/gomock"
 )
 
@@ -180,18 +180,18 @@ func (m *MockMeteoClient) EXPECT() *MockMeteoClientMockRecorder {
 }
 
 // CurrentWeather mocks base method.
-func (m *MockMeteoClient) CurrentWeather(ctx context.Context, coordinates weather_collector.Coordinates, params weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error) {
+func (m *MockMeteoClient) CurrentWeather(ctx context.Context, city weather_collector.City, params weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CurrentWeather", ctx, coordinates, params)
+	ret := m.ctrl.Call(m, "CurrentWeather", ctx, city, params)
 	ret0, _ := ret[0].(weather_collector.CityWeatherCondition)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CurrentWeather indicates an expected call of CurrentWeather.
-func (mr *MockMeteoClientMockRecorder) CurrentWeather(ctx, coordinates, params any) *MockMeteoClientCurrentWeatherCall {
+func (mr *MockMeteoClientMockRecorder) CurrentWeather(ctx, city, params any) *MockMeteoClientCurrentWeatherCall {
 	mr.mock.ctrl.T.Helper()
-	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CurrentWeather", reflect.TypeOf((*MockMeteoClient)(nil).CurrentWeather), ctx, coordinates, params)
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CurrentWeather", reflect.TypeOf((*MockMeteoClient)(nil).CurrentWeather), ctx, city, params)
 	return &MockMeteoClientCurrentWeatherCall{Call: call}
 }
 
@@ -207,13 +207,13 @@ func (c *MockMeteoClientCurrentWeatherCall) Return(arg0 weather_collector.CityWe
 }
 
 // Do rewrite *gomock.Call.Do
-func (c *MockMeteoClientCurrentWeatherCall) Do(f func(context.Context, weather_collector.Coordinates, weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error)) *MockMeteoClientCurrentWeatherCall {
+func (c *MockMeteoClientCurrentWeatherCall) Do(f func(context.Context, weather_collector.City, weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error)) *MockMeteoClientCurrentWeatherCall {
 	c.Call = c.Call.Do(f)
 	return c
 }
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
-func (c *MockMeteoClientCurrentWeatherCall) DoAndReturn(f func(context.Context, weather_collector.Coordinates, weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error)) *MockMeteoClientCurrentWeatherCall {
+func (c *MockMeteoClientCurrentWeatherCall) DoAndReturn(f func(context.Context, weather_collector.City, weather_collector.MonitoringParamsMap) (weather_collector.CityWeatherCondition, error)) *MockMeteoClientCurrentWeatherCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }

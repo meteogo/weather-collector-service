@@ -1,4 +1,4 @@
-package weather_collector_test
+package weather_service_test
 
 import (
 	"context"
@@ -9,16 +9,16 @@ import (
 
 	"github.com/meteogo/logger/pkg/logger"
 	"github.com/meteogo/weather-collector-service/internal/pkg/enums"
-	"github.com/meteogo/weather-collector-service/internal/services/weather_collector"
+	"github.com/meteogo/weather-collector-service/internal/services/weather_service"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
 
 var (
-	berlinCondition = weather_collector.CityWeatherCondition{
-		City: weather_collector.City{
+	berlinCondition = weather_service.CityWeatherCondition{
+		City: weather_service.City{
 			Name: "Berlin",
-			Coordinates: weather_collector.Coordinates{
+			Coordinates: weather_service.Coordinates{
 				Lat:  52.52,
 				Long: 13.41,
 			},
@@ -33,10 +33,10 @@ var (
 		VisibilityMeters:         40 * enums.Kilometer,
 	}
 
-	parisCondition = weather_collector.CityWeatherCondition{
-		City: weather_collector.City{
+	parisCondition = weather_service.CityWeatherCondition{
+		City: weather_service.City{
 			Name: "Paris",
-			Coordinates: weather_collector.Coordinates{
+			Coordinates: weather_service.Coordinates{
 				Lat:  48.86,
 				Long: 2.35,
 			},
@@ -51,10 +51,10 @@ var (
 		VisibilityMeters:         31 * enums.Kilometer,
 	}
 
-	londonCondition = weather_collector.CityWeatherCondition{
-		City: weather_collector.City{
+	londonCondition = weather_service.CityWeatherCondition{
+		City: weather_service.City{
 			Name: "London",
-			Coordinates: weather_collector.Coordinates{
+			Coordinates: weather_service.Coordinates{
 				Lat:  41.90,
 				Long: -0.13,
 			},
@@ -76,47 +76,56 @@ func TestWeatherCollectorService(t *testing.T) {
 
 	tests := []struct {
 		name        string
-		config      func(ctrl *gomock.Controller) weather_collector.Config
-		meteoClient func(ctrl *gomock.Controller) weather_collector.MeteoClient
-		storage     func(ctrl *gomock.Controller) weather_collector.Storage
+		config      func(ctrl *gomock.Controller) weather_service.Config
+		meteoClient func(ctrl *gomock.Controller) weather_service.MeteoClient
+		storage     func(ctrl *gomock.Controller) weather_service.Storage
 		wantErrFunc assert.ErrorAssertionFunc
 	}{
 		{
 			name: "happy path",
-			config: func(ctrl *gomock.Controller) weather_collector.Config {
+			config: func(ctrl *gomock.Controller) weather_service.Config {
 				return mockConfig(ctrl)
 			},
-			meteoClient: func(ctrl *gomock.Controller) weather_collector.MeteoClient {
+			meteoClient: func(ctrl *gomock.Controller) weather_service.MeteoClient {
 				mock := NewMockMeteoClient(ctrl)
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  52.52,
-						Long: 13.41,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Berlin",
+						Coordinates: weather_service.Coordinates{
+							Lat:  52.52,
+							Long: 13.41,
+						},
 					}), gomock.Any()).
 					Return(berlinCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  48.86,
-						Long: 2.35,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Paris",
+						Coordinates: weather_service.Coordinates{
+							Lat:  48.86,
+							Long: 2.35,
+						},
 					}), gomock.Any()).
 					Return(parisCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  41.90,
-						Long: -0.13,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "London",
+						Coordinates: weather_service.Coordinates{
+							Lat:  41.90,
+							Long: -0.13,
+						},
 					}), gomock.Any()).
 					Return(londonCondition, nil).
 					Times(1)
 
 				return mock
 			},
-			storage: func(ctrl *gomock.Controller) weather_collector.Storage {
+			storage: func(ctrl *gomock.Controller) weather_service.Storage {
 				mock := NewMockStorage(ctrl)
-				expectedConditions := weather_collector.CityWeatherConditions{
+				expectedConditions := weather_service.CityWeatherConditions{
 					berlinCondition,
 					parisCondition,
 					londonCondition,
@@ -124,7 +133,7 @@ func TestWeatherCollectorService(t *testing.T) {
 
 				mock.EXPECT().
 					Save(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(_ context.Context, conditions weather_collector.CityWeatherConditions) error {
+					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return nil
 					}).
@@ -136,47 +145,56 @@ func TestWeatherCollectorService(t *testing.T) {
 		},
 		{
 			name: "meteo client error",
-			config: func(ctrl *gomock.Controller) weather_collector.Config {
+			config: func(ctrl *gomock.Controller) weather_service.Config {
 				return mockConfig(ctrl)
 			},
-			meteoClient: func(ctrl *gomock.Controller) weather_collector.MeteoClient {
+			meteoClient: func(ctrl *gomock.Controller) weather_service.MeteoClient {
 				mock := NewMockMeteoClient(ctrl)
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  52.52,
-						Long: 13.41,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Berlin",
+						Coordinates: weather_service.Coordinates{
+							Lat:  52.52,
+							Long: 13.41,
+						},
 					}), gomock.Any()).
 					Return(berlinCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  48.86,
-						Long: 2.35,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Paris",
+						Coordinates: weather_service.Coordinates{
+							Lat:  48.86,
+							Long: 2.35,
+						},
 					}), gomock.Any()).
 					Return(parisCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  41.90,
-						Long: -0.13,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "London",
+						Coordinates: weather_service.Coordinates{
+							Lat:  41.90,
+							Long: -0.13,
+						},
 					}), gomock.Any()).
-					Return(weather_collector.CityWeatherCondition{}, errors.New("client error")).
+					Return(weather_service.CityWeatherCondition{}, errors.New("client error")).
 					Times(1)
 
 				return mock
 			},
-			storage: func(ctrl *gomock.Controller) weather_collector.Storage {
+			storage: func(ctrl *gomock.Controller) weather_service.Storage {
 				mock := NewMockStorage(ctrl)
-				expectedConditions := weather_collector.CityWeatherConditions{
+				expectedConditions := weather_service.CityWeatherConditions{
 					berlinCondition,
 					parisCondition,
 				}
 
 				mock.EXPECT().
 					Save(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(_ context.Context, conditions weather_collector.CityWeatherConditions) error {
+					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return nil
 					}).
@@ -188,40 +206,49 @@ func TestWeatherCollectorService(t *testing.T) {
 		},
 		{
 			name: "storage error",
-			config: func(ctrl *gomock.Controller) weather_collector.Config {
+			config: func(ctrl *gomock.Controller) weather_service.Config {
 				return mockConfig(ctrl)
 			},
-			meteoClient: func(ctrl *gomock.Controller) weather_collector.MeteoClient {
+			meteoClient: func(ctrl *gomock.Controller) weather_service.MeteoClient {
 				mock := NewMockMeteoClient(ctrl)
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  52.52,
-						Long: 13.41,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Berlin",
+						Coordinates: weather_service.Coordinates{
+							Lat:  52.52,
+							Long: 13.41,
+						},
 					}), gomock.Any()).
 					Return(berlinCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  48.86,
-						Long: 2.35,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "Paris",
+						Coordinates: weather_service.Coordinates{
+							Lat:  48.86,
+							Long: 2.35,
+						},
 					}), gomock.Any()).
 					Return(parisCondition, nil).
 					Times(1)
 
 				mock.EXPECT().
-					CurrentWeather(gomock.Any(), gomock.Eq(weather_collector.Coordinates{
-						Lat:  41.90,
-						Long: -0.13,
+					CurrentWeather(gomock.Any(), gomock.Eq(weather_service.City{
+						Name: "London",
+						Coordinates: weather_service.Coordinates{
+							Lat:  41.90,
+							Long: -0.13,
+						},
 					}), gomock.Any()).
 					Return(londonCondition, nil).
 					Times(1)
 
 				return mock
 			},
-			storage: func(ctrl *gomock.Controller) weather_collector.Storage {
+			storage: func(ctrl *gomock.Controller) weather_service.Storage {
 				mock := NewMockStorage(ctrl)
-				expectedConditions := weather_collector.CityWeatherConditions{
+				expectedConditions := weather_service.CityWeatherConditions{
 					berlinCondition,
 					parisCondition,
 					londonCondition,
@@ -229,7 +256,7 @@ func TestWeatherCollectorService(t *testing.T) {
 
 				mock.EXPECT().
 					Save(gomock.Any(), gomock.Any()).
-					DoAndReturn(func(_ context.Context, conditions weather_collector.CityWeatherConditions) error {
+					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return errors.New("storage error")
 					}).
@@ -246,7 +273,7 @@ func TestWeatherCollectorService(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			service := weather_collector.NewService(
+			service := weather_service.NewService(
 				tt.config(ctrl),
 				tt.meteoClient(ctrl),
 				tt.storage(ctrl),
@@ -260,28 +287,28 @@ func TestWeatherCollectorService(t *testing.T) {
 	}
 }
 
-func mockConfig(ctrl *gomock.Controller) weather_collector.Config {
+func mockConfig(ctrl *gomock.Controller) weather_service.Config {
 	mock := NewMockConfig(ctrl)
 	mock.EXPECT().
 		ReportedCities().
-		Return(weather_collector.ReportedCities{
+		Return(weather_service.ReportedCities{
 			{
 				Name: "Berlin",
-				Coordinates: weather_collector.Coordinates{
+				Coordinates: weather_service.Coordinates{
 					Lat:  52.52,
 					Long: 13.41,
 				},
 			},
 			{
 				Name: "Paris",
-				Coordinates: weather_collector.Coordinates{
+				Coordinates: weather_service.Coordinates{
 					Lat:  48.86,
 					Long: 2.35,
 				},
 			},
 			{
 				Name: "London",
-				Coordinates: weather_collector.Coordinates{
+				Coordinates: weather_service.Coordinates{
 					Lat:  41.90,
 					Long: -0.13,
 				},
@@ -291,7 +318,7 @@ func mockConfig(ctrl *gomock.Controller) weather_collector.Config {
 
 	mock.EXPECT().
 		MonitoringParams().
-		Return(weather_collector.MonitoringParamsMap{
+		Return(weather_service.MonitoringParamsMap{
 			enums.MonitoringParamTemperature:      "temperature_2m",
 			enums.MonitoringParamRelativeHumidity: "relative_humidity_2m",
 			enums.MonitoringParamWindSpeed:        "wind_speed_10m",

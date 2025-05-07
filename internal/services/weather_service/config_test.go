@@ -1,4 +1,4 @@
-package weather_collector_test
+package weather_service_test
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/meteogo/config/pkg/config"
 	appconfig "github.com/meteogo/weather-collector-service/internal/config"
 	"github.com/meteogo/weather-collector-service/internal/pkg/enums"
-	"github.com/meteogo/weather-collector-service/internal/services/weather_collector"
+	"github.com/meteogo/weather-collector-service/internal/services/weather_service"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 )
@@ -16,38 +16,38 @@ func TestWeatherCollectorConfig(t *testing.T) {
 
 	tests := []struct {
 		name                 string
-		wantReportedCities   weather_collector.ReportedCities
-		wantMonitoringParams weather_collector.MonitoringParamsMap
+		wantReportedCities   weather_service.ReportedCities
+		wantMonitoringParams weather_service.MonitoringParamsMap
 		wantWorkerPoolSize   int
 		provider             func(ctrl *gomock.Controller) config.Provider
 		wantErrFunc          assert.ErrorAssertionFunc
 	}{
 		{
 			name: "happy path",
-			wantReportedCities: weather_collector.ReportedCities{
+			wantReportedCities: weather_service.ReportedCities{
 				{
 					Name: "Berlin",
-					Coordinates: weather_collector.Coordinates{
+					Coordinates: weather_service.Coordinates{
 						Lat:  52.52,
 						Long: 13.41,
 					},
 				},
 				{
 					Name: "Paris",
-					Coordinates: weather_collector.Coordinates{
+					Coordinates: weather_service.Coordinates{
 						Lat:  48.86,
 						Long: 2.35,
 					},
 				},
 				{
 					Name: "London",
-					Coordinates: weather_collector.Coordinates{
+					Coordinates: weather_service.Coordinates{
 						Lat:  51.51,
 						Long: -0.13,
 					},
 				},
 			},
-			wantMonitoringParams: weather_collector.MonitoringParamsMap{
+			wantMonitoringParams: weather_service.MonitoringParamsMap{
 				enums.MonitoringParamTemperature:      "temperature_2m",
 				enums.MonitoringParamRelativeHumidity: "relative_humidity_2m",
 				enums.MonitoringParamWindSpeed:        "wind_speed_10m",
@@ -69,7 +69,7 @@ func TestWeatherCollectorConfig(t *testing.T) {
 			t.Parallel()
 
 			ctrl := gomock.NewController(t)
-			cfg, err := weather_collector.NewConfig(tt.provider(ctrl))
+			cfg, err := weather_service.NewConfig(tt.provider(ctrl))
 			if !tt.wantErrFunc(t, err) {
 				t.Fail()
 			}

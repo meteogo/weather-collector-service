@@ -7,7 +7,7 @@
 //
 
 // Package weather_collector_test is a generated GoMock package.
-package weather_collector_test
+package weather_service_test
 
 import (
 	reflect "reflect"

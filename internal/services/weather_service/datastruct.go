@@ -1,4 +1,4 @@
-package weather_collector
+package weather_service
 
 import (
 	"time"

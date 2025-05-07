@@ -1,10 +1,9 @@
-package weather_collector
+package weather_service
 
 import (
 	"context"
 	"log/slog"
 	"sync"
-	"time"
 
 	"github.com/meteogo/logger/pkg/logger"
 )
@@ -18,7 +17,7 @@ type Config interface {
 }
 
 type MeteoClient interface {
-	CurrentWeather(ctx context.Context, coordinates Coordinates, params MonitoringParamsMap) (CityWeatherCondition, error)
+	CurrentWeather(ctx context.Context, city City, params MonitoringParamsMap) (CityWeatherCondition, error)
 }
 
 type Storage interface {
@@ -40,7 +39,6 @@ func NewService(config Config, meteoClient MeteoClient, storage Storage) *Servic
 }
 
 func (s *Service) CollectData(ctx context.Context) error {
-	start := time.Now()
 	reportedCities := s.config.ReportedCities()
 	if len(reportedCities) == 0 {
 		return nil
@@ -74,7 +72,7 @@ func (s *Service) CollectData(ctx context.Context) error {
 						return
 					}
 
-					weather, err := s.meteoClient.CurrentWeather(ctx, city.Coordinates, s.config.MonitoringParams())
+					weather, err := s.meteoClient.CurrentWeather(ctx, city, s.config.MonitoringParams())
 					if err != nil {
 						logger.Error(ctx, "unable to get current weather for city", slog.Any("city", city), slog.Any("err", err))
 						continue
@@ -104,11 +102,6 @@ func (s *Service) CollectData(ctx context.Context) error {
 		return err
 	}
 
-	logger.Info(
-		ctx,
-		"successfully done weather collecting job",
-		slog.Int("citiesCount", len(s.config.ReportedCities())),
-		slog.Any("timeEstimated", time.Since(start)),
-	)
+	logger.Info(ctx, "successfully saved reported cities", slog.Int("savedCitiesCount", len(conditions)))
 	return nil
 }
