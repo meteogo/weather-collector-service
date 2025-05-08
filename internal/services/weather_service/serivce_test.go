@@ -23,14 +23,14 @@ var (
 				Long: 13.41,
 			},
 		},
-		CapturedAt:               must(time.ParseInLocation(time.DateTime, "2025-05-03 12:58:00", time.FixedZone("", 0))),
-		Temperature:              12.5,
-		RelativeHumidityPercent:  20,
-		WindSpeed:                3.7,
-		WeatherCode:              enums.ClearSky,
-		CloudCoverPercent:        3,
-		PrecipitationMillimeters: 3 * enums.Millimeter,
-		VisibilityMeters:         40 * enums.Kilometer,
+		CapturedAt:              must(time.ParseInLocation(time.DateTime, "2025-05-03 12:58:00", time.FixedZone("", 0))),
+		Temperature:             12.5,
+		RelativeHumidityPercent: 20,
+		WindSpeed:               3.7,
+		WeatherCode:             enums.ClearSky,
+		CloudCoverPercent:       3,
+		Precipitation:           3 * enums.Millimeter,
+		Visibility:              40 * enums.Kilometer,
 	}
 
 	parisCondition = weather_service.CityWeatherCondition{
@@ -41,14 +41,14 @@ var (
 				Long: 2.35,
 			},
 		},
-		CapturedAt:               must(time.ParseInLocation(time.DateTime, "2025-05-03 13:03:00", time.FixedZone("", 0))),
-		Temperature:              10.5,
-		RelativeHumidityPercent:  13,
-		WindSpeed:                4.2,
-		WeatherCode:              enums.PartlyCloudy,
-		CloudCoverPercent:        29,
-		PrecipitationMillimeters: 15 * enums.Millimeter,
-		VisibilityMeters:         31 * enums.Kilometer,
+		CapturedAt:              must(time.ParseInLocation(time.DateTime, "2025-05-03 13:03:00", time.FixedZone("", 0))),
+		Temperature:             10.5,
+		RelativeHumidityPercent: 13,
+		WindSpeed:               4.2,
+		WeatherCode:             enums.PartlyCloudy,
+		CloudCoverPercent:       29,
+		Precipitation:           15 * enums.Millimeter,
+		Visibility:              31 * enums.Kilometer,
 	}
 
 	londonCondition = weather_service.CityWeatherCondition{
@@ -59,18 +59,18 @@ var (
 				Long: -0.13,
 			},
 		},
-		CapturedAt:               must(time.ParseInLocation(time.DateTime, "2025-05-03 13:05:00", time.FixedZone("", 0))),
-		Temperature:              11.8,
-		RelativeHumidityPercent:  20,
-		WindSpeed:                6.2,
-		WeatherCode:              enums.Fog,
-		CloudCoverPercent:        75,
-		PrecipitationMillimeters: 40 * enums.Millimeter,
-		VisibilityMeters:         5 * enums.Kilometer,
+		CapturedAt:              must(time.ParseInLocation(time.DateTime, "2025-05-03 13:05:00", time.FixedZone("", 0))),
+		Temperature:             11.8,
+		RelativeHumidityPercent: 20,
+		WindSpeed:               6.2,
+		WeatherCode:             enums.Fog,
+		CloudCoverPercent:       75,
+		Precipitation:           40 * enums.Millimeter,
+		Visibility:              5 * enums.Kilometer,
 	}
 )
 
-func TestWeatherCollectorService(t *testing.T) {
+func TestWeatherService_CollectData(t *testing.T) {
 	t.Parallel()
 	logger.InitLogger(logger.EnvTypeTesting, slog.LevelDebug)
 
@@ -132,7 +132,7 @@ func TestWeatherCollectorService(t *testing.T) {
 				}
 
 				mock.EXPECT().
-					Save(gomock.Any(), gomock.Any()).
+					SaveConditions(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return nil
@@ -193,7 +193,7 @@ func TestWeatherCollectorService(t *testing.T) {
 				}
 
 				mock.EXPECT().
-					Save(gomock.Any(), gomock.Any()).
+					SaveConditions(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return nil
@@ -255,7 +255,7 @@ func TestWeatherCollectorService(t *testing.T) {
 				}
 
 				mock.EXPECT().
-					Save(gomock.Any(), gomock.Any()).
+					SaveConditions(gomock.Any(), gomock.Any()).
 					DoAndReturn(func(_ context.Context, conditions weather_service.CityWeatherConditions) error {
 						assert.ElementsMatch(t, expectedConditions, conditions, "Saved conditions do not match expected conditions")
 						return errors.New("storage error")
@@ -276,6 +276,7 @@ func TestWeatherCollectorService(t *testing.T) {
 			service := weather_service.NewService(
 				tt.config(ctrl),
 				tt.meteoClient(ctrl),
+				nil,
 				tt.storage(ctrl),
 			)
 

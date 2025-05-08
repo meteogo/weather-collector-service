@@ -11,7 +11,7 @@ CREATE TABLE current_weather_conditions (
     weather_code              INTEGER             NOT NULL,
     cloud_cover_percent       SMALLINT            NOT NULL,
     precipitation_millimeters DOUBLE PRECISION    NOT NULL,
-    visibility_meters         DOUBLE PRECISION    NOT NULL
+    visibility_millimeters    DOUBLE PRECISION    NOT NULL
 );
 -- +goose StatementEnd
 

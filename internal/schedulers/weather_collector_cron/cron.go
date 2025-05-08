@@ -1,4 +1,4 @@
-package weather_cron
+package weather_collector_cron
 
 import (
 	"context"

@@ -13,7 +13,7 @@ import (
 	"github.com/meteogo/weather-collector-service/internal/pkg/enums"
 )
 
-//go:generate mockgen -source config.go -destination config_mocks_test.go -package weather_collector_test -typed
+//go:generate mockgen -source config.go -destination config_mocks_test.go -package weather_service_test -typed
 
 var _ Config = &configImpl{}
 

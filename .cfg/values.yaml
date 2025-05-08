@@ -1,6 +1,9 @@
 weather_collector_cron_duration:
   type: "duration"
   value: "10s"
+weather_sender_cron_duration:
+  type: "duration"
+  value: "5s"
 collector_worker_pool_size:
   type: "int"
   value: 5

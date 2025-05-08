@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package weather_collector_events;
+
+option go_package = "pkg/events/weather;weather_collector_events";
+
+import "google/protobuf/timestamp.proto";
+
+message Coordinates {
+    double lat = 1;
+    double long = 2;
+}
+
+message City {
+    string name = 1;
+    Coordinates coordinates = 2;
+}
+
+enum WeatherCode {
+    WEATHER_CODE_CLEAR_SKY = 0;
+    WEATHER_CODE_MAINLY_CLEAR = 1;
+    WEATHER_CODE_PARTLY_CLOUDY = 2;
+    WEATHER_CODE_OVERCAST = 3;
+    WEATHER_CODE_FOG = 45;
+    WEATHER_CODE_DEPOSITING_RIME_FOG = 48;
+    WEATHER_CODE_DRIZZLE_LIGHT = 51;
+    WEATHER_CODE_DRIZZLE_MODERATE = 53;
+    WEATHER_CODE_DRIZZLE_DENSE = 55;
+    WEATHER_CODE_FREEZING_DRIZZLE_LIGHT = 56;
+    WEATHER_CODE_FREEZING_DRIZZLE_DENSE = 57;
+    WEATHER_CODE_RAIN_SLIGHT = 61;
+    WEATHER_CODE_RAIN_MODERATE = 63;
+    WEATHER_CODE_RAIN_HEAVY = 65;
+    WEATHER_CODE_FREEZING_RAIN_LIGHT = 66;
+    WEATHER_CODE_FREEZING_RAIN_HEAVY = 67;
+    WEATHER_CODE_SNOW_FALL_SLIGHT = 71;
+    WEATHER_CODE_SNOW_FALL_MODERATE = 73;
+    WEATHER_CODE_SNOW_FALL_HEAVY = 75;
+    WEATHER_CODE_SNOW_GRAINS = 77;
+    WEATHER_CODE_RAIN_SHOWERS_SLIGHT = 80;
+    WEATHER_CODE_RAIN_SHOWERS_MODERATE = 81;
+    WEATHER_CODE_RAIN_SHOWERS_VIOLENT = 82;
+    WEATHER_CODE_SNOW_SHOWERS_SLIGHT = 85;
+    WEATHER_CODE_SNOW_SHOWERS_HEAVY = 86;
+    WEATHER_CODE_THUNDERSTORM_SLIGHT = 95;
+    WEATHER_CODE_THUNDERSTORM_HAIL_SLIGHT = 96;
+    WEATHER_CODE_THUNDERSTORM_HAIL_HEAVY = 99;
+}
+
+message CityWeatherCondition {
+    City city = 1;
+    google.protobuf.Timestamp captured_at = 2;
+    double temperature = 3;
+    uint32 relative_humidity_percent = 4;
+    double wind_speed = 5;
+    WeatherCode weather_code = 6;
+    uint32 cloud_cover_percent = 7;
+    int64 precipitation_millimeters = 8;
+    int64 visibility_millimeters = 9;
+}
+
+message CityWeatherConditions {
+    repeated CityWeatherCondition conditions = 1;
+}

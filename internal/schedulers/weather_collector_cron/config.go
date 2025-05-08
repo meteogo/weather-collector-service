@@ -1,4 +1,4 @@
-package weather_cron
+package weather_collector_cron
 
 import (
 	"context"
@@ -10,8 +10,6 @@ import (
 	"github.com/meteogo/logger/pkg/logger"
 	appconfig "github.com/meteogo/weather-collector-service/internal/config"
 )
-
-//go:generate mockgen -source config.go -destination config_mocks_test.go -package weather_collector_test -typed
 
 var _ Config = &configImpl{}
 

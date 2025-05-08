@@ -4,6 +4,10 @@ vars:
   APP_NAME: weather_collector_service
 
 tasks:
+  generate:
+    cmds:
+      - protoc -I ./api/events ./api/events/current_weather_conditions.proto --go_out=./pkg/events --validate_out="lang=go,paths=source_relative:./pkg/events" --go_opt=paths=source_relative --go-grpc_out=./pkg/events --go-grpc_opt=paths=source_relative
+
   run:
     cmds:
       - go run ./cmd/{{.APP_NAME}}/main.go

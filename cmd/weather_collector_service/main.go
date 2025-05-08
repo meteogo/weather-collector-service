@@ -10,6 +10,7 @@ import (
 	"github.com/meteogo/config/pkg/config"
 	"github.com/meteogo/logger/pkg/logger"
 	"github.com/meteogo/weather-collector-service/cmd/weather_collector_service/app"
+	"github.com/meteogo/weather-collector-service/internal/closer"
 )
 
 func main() {
@@ -28,7 +29,8 @@ func main() {
 	var (
 		repositories = app.InitRepositories(ctx, provider)
 		clients      = app.InitClients()
-		services     = app.InitServices(ctx, provider, clients, repositories)
+		publishers   = app.InitPublishers(ctx, provider)
+		services     = app.InitServices(provider, clients, publishers, repositories)
 		_            = app.InitSchedulers(ctx, provider, services)
 	)
 
@@ -36,5 +38,8 @@ func main() {
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	<-signalChan
 
+	if err := closer.Close(ctx); err != nil {
+		logger.Error(ctx, "error while closer.Close()", slog.Any("error", err))
+	}
 	logger.Info(ctx, "server gracefully shutdowned")
 }

@@ -21,15 +21,15 @@ type (
 	MonitoringParamsMap map[enums.MonitoringParam]string
 
 	CityWeatherCondition struct {
-		City                     City
-		CapturedAt               time.Time
-		Temperature              float64
-		RelativeHumidityPercent  uint8
-		WindSpeed                float64
-		WeatherCode              enums.WeatherCode
-		CloudCoverPercent        uint8
-		PrecipitationMillimeters enums.Length
-		VisibilityMeters         enums.Length
+		City                    City
+		CapturedAt              time.Time
+		Temperature             float64
+		RelativeHumidityPercent uint8
+		WindSpeed               float64
+		WeatherCode             enums.WeatherCode
+		CloudCoverPercent       uint8
+		Precipitation           enums.Length
+		Visibility              enums.Length
 	}
 
 	CityWeatherConditions []CityWeatherCondition

@@ -8,7 +8,7 @@ import (
 	"github.com/meteogo/logger/pkg/logger"
 )
 
-//go:generate mockgen -source service.go -destination service_mocks_test.go -package weather_collector_test -typed
+//go:generate mockgen -source service.go -destination service_mocks_test.go -package weather_service_test -typed
 
 type Config interface {
 	ReportedCities() ReportedCities
@@ -20,20 +20,27 @@ type MeteoClient interface {
 	CurrentWeather(ctx context.Context, city City, params MonitoringParamsMap) (CityWeatherCondition, error)
 }
 
+type Publisher interface {
+	PublishConditions(ctx context.Context, conditions CityWeatherConditions) error
+}
+
 type Storage interface {
-	Save(ctx context.Context, conditions CityWeatherConditions) error
+	SaveConditions(ctx context.Context, conditions CityWeatherConditions) error
+	GetConditions(ctx context.Context) (CityWeatherConditions, error)
 }
 
 type Service struct {
 	config      Config
 	meteoClient MeteoClient
+	publisher   Publisher
 	storage     Storage
 }
 
-func NewService(config Config, meteoClient MeteoClient, storage Storage) *Service {
+func NewService(config Config, meteoClient MeteoClient, publisher Publisher, storage Storage) *Service {
 	return &Service{
 		config:      config,
 		meteoClient: meteoClient,
+		publisher:   publisher,
 		storage:     storage,
 	}
 }
@@ -98,10 +105,26 @@ func (s *Service) CollectData(ctx context.Context) error {
 	close(resultChan)
 	resultWg.Wait()
 
-	if err := s.storage.Save(ctx, conditions); err != nil {
+	if err := s.storage.SaveConditions(ctx, conditions); err != nil {
 		return err
 	}
 
 	logger.Info(ctx, "successfully saved reported cities", slog.Int("savedCitiesCount", len(conditions)))
+	return nil
+}
+
+func (s *Service) SendData(ctx context.Context) error {
+	conditions, err := s.storage.GetConditions(ctx)
+	if err != nil {
+		logger.Error(ctx, "error getting conditions from storage", slog.Any("error", err))
+		return err
+	}
+
+	if err := s.publisher.PublishConditions(ctx, conditions); err != nil {
+		logger.Error(ctx, "error publishing conditions", slog.Any("error", err))
+		return err
+	}
+
+	logger.Info(ctx, "weather conditions published successfully")
 	return nil
 }
