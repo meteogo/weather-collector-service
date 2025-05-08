@@ -3,6 +3,7 @@ package weather_publisher
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"log/slog"
 
 	"github.com/meteogo/logger/pkg/logger"
@@ -10,6 +11,7 @@ import (
 	"github.com/meteogo/weather-collector-service/internal/services/weather_service"
 	weather_collector_events "github.com/meteogo/weather-collector-service/pkg/events"
 	"github.com/segmentio/kafka-go"
+	"go.opentelemetry.io/otel"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -33,6 +35,9 @@ func NewPublisher(writer LibWriter) *WeatherPublisher {
 }
 
 func (wp *WeatherPublisher) PublishConditions(ctx context.Context, conditions weather_service.CityWeatherConditions) error {
+	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.PublishConditions]", wp))
+	defer span.End()
+
 	if len(conditions) == 0 {
 		logger.Warn(ctx, "conditions len is zero, skipping publishing")
 		return nil
@@ -51,7 +56,7 @@ func (wp *WeatherPublisher) PublishConditions(ctx context.Context, conditions we
 		return err
 	}
 
-	if err := wp.writer.WriteMessages(ctx, kafka.Message{
+	if err := wp.writer.WriteMessages(spanCtx, kafka.Message{
 		Key:   []byte(weatherMessageKey),
 		Value: jsonBytes,
 	}); err != nil {

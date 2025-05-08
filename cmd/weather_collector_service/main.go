@@ -34,6 +34,8 @@ func main() {
 		_            = app.InitSchedulers(ctx, provider, services)
 	)
 
+	app.InitTracer(ctx, provider)
+
 	signalChan := make(chan os.Signal, 1)
 	signal.Notify(signalChan, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
 	<-signalChan

@@ -2,11 +2,13 @@ package weather_sender_cron
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
 	"github.com/meteogo/logger/pkg/logger"
 	"github.com/robfig/cron/v3"
+	"go.opentelemetry.io/otel"
 )
 
 type Config interface {
@@ -42,7 +44,10 @@ func (c *Cron) Start(ctx context.Context) {
 
 func (c *Cron) Do(ctx context.Context) {
 	start := time.Now()
-	if err := c.service.SendData(ctx); err != nil {
+	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.Do]", c))
+	defer span.End()
+
+	if err := c.service.SendData(spanCtx); err != nil {
 		logger.Error(ctx, "error in weather sender cron tick", slog.Any("error", err))
 		return
 	}

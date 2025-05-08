@@ -6,8 +6,12 @@ const (
 	WeatherCollectorCronDuration = config.Key("weather_collector_cron_duration")
 	WeatherSenderCronDuration    = config.Key("weather_sender_cron_duration")
 	CollectorWorkerPoolSize      = config.Key("collector_worker_pool_size")
-	ReportedCities               = config.Key("reported_cities")
-	MonitoringParams             = config.Key("monitoring_params")
+
+	ReportedCities   = config.Key("reported_cities")
+	MonitoringParams = config.Key("monitoring_params")
+
+	ApplicationName = config.Key("application_name")
+	Env             = config.Key("env")
 )
 
 const (
@@ -20,4 +24,7 @@ const (
 	KafkaHost             = config.Secret("KAFKA_HOST")
 	KafkaPort             = config.Secret("KAFKA_PORT")
 	KafkaWeatherTopicName = config.Secret("KAFKA_WEATHER_TOPIC_NAME")
+
+	JaegerHost = config.Secret("JAEGER_HOST")
+	JaegerPort = config.Secret("JAEGER_PORT")
 )

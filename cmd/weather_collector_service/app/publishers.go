@@ -29,7 +29,7 @@ func InitPublishers(ctx context.Context, provider config.Provider) Publishers {
 		weatherPublisher = weather_publisher.NewPublisher(weatherWriter)
 	)
 
-	mustConnectToKafka(ctx, host, port)
+	mustConnectToKafka(ctx, host, port, weatherTopic)
 	closer.Add(func(ctx context.Context) error {
 		logger.Info(ctx, "closing weather publisher")
 		return weatherPublisher.Close(ctx)
@@ -39,8 +39,8 @@ func InitPublishers(ctx context.Context, provider config.Provider) Publishers {
 	}
 }
 
-func mustConnectToKafka(ctx context.Context, host, port string) {
-	conn, err := kafka.DialContext(ctx, "tcp", net.JoinHostPort(host, port))
+func mustConnectToKafka(ctx context.Context, host, port, topic string) {
+	conn, err := kafka.DialLeader(ctx, "tcp", net.JoinHostPort(host, port), topic, 0)
 	if err != nil {
 		logger.Error(ctx, "can not establish connection with kafka")
 		panic(err)

@@ -1,9 +1,15 @@
+application_name:
+  type: "string"
+  value: "weather-collector-service"
+env:
+  type: "string"
+  value: "LOCAL"
 weather_collector_cron_duration:
   type: "duration"
-  value: "10s"
+  value: "20s"
 weather_sender_cron_duration:
   type: "duration"
-  value: "5s"
+  value: "25s"
 collector_worker_pool_size:
   type: "int"
   value: 5

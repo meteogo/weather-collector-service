@@ -11,6 +11,7 @@ import (
 	"github.com/meteogo/logger/pkg/logger"
 	"github.com/meteogo/weather-collector-service/internal/pkg/enums"
 	"github.com/meteogo/weather-collector-service/internal/services/weather_service"
+	"go.opentelemetry.io/otel"
 
 	_ "github.com/lib/pq"
 )
@@ -26,6 +27,9 @@ func NewRepository(db *sql.DB) *Repository {
 }
 
 func (r *Repository) SaveConditions(ctx context.Context, conditions weather_service.CityWeatherConditions) error {
+	_, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.SaveConditions]", r))
+	defer span.End()
+
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	qb := psql.
@@ -84,6 +88,9 @@ func (r *Repository) SaveConditions(ctx context.Context, conditions weather_serv
 }
 
 func (r *Repository) GetConditions(ctx context.Context) (weather_service.CityWeatherConditions, error) {
+	_, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.GetConditions]", r))
+	defer span.End()
+
 	psql := sq.StatementBuilder.PlaceholderFormat(sq.Dollar)
 
 	qb := psql.Select(

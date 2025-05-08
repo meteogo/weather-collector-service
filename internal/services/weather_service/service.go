@@ -2,10 +2,12 @@ package weather_service
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"sync"
 
 	"github.com/meteogo/logger/pkg/logger"
+	"go.opentelemetry.io/otel"
 )
 
 //go:generate mockgen -source service.go -destination service_mocks_test.go -package weather_service_test -typed
@@ -46,9 +48,25 @@ func NewService(config Config, meteoClient MeteoClient, publisher Publisher, sto
 }
 
 func (s *Service) CollectData(ctx context.Context) error {
+	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.CollectData]", s))
+	defer span.End()
+
+	conditions := s.collectDataFromClient(spanCtx)
+	if err := s.storage.SaveConditions(spanCtx, conditions); err != nil {
+		return err
+	}
+
+	logger.Info(ctx, "successfully saved reported cities", slog.Int("savedCitiesCount", len(conditions)))
+	return nil
+}
+
+func (s *Service) collectDataFromClient(ctx context.Context) CityWeatherConditions {
+	_, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.collectDataFromClient]", s))
+	defer span.End()
+
 	reportedCities := s.config.ReportedCities()
 	if len(reportedCities) == 0 {
-		return nil
+		return CityWeatherConditions{}
 	}
 
 	cityChan := make(chan City, len(reportedCities))
@@ -105,22 +123,20 @@ func (s *Service) CollectData(ctx context.Context) error {
 	close(resultChan)
 	resultWg.Wait()
 
-	if err := s.storage.SaveConditions(ctx, conditions); err != nil {
-		return err
-	}
-
-	logger.Info(ctx, "successfully saved reported cities", slog.Int("savedCitiesCount", len(conditions)))
-	return nil
+	return conditions
 }
 
 func (s *Service) SendData(ctx context.Context) error {
-	conditions, err := s.storage.GetConditions(ctx)
+	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.SendData]", s))
+	defer span.End()
+
+	conditions, err := s.storage.GetConditions(spanCtx)
 	if err != nil {
 		logger.Error(ctx, "error getting conditions from storage", slog.Any("error", err))
 		return err
 	}
 
-	if err := s.publisher.PublishConditions(ctx, conditions); err != nil {
+	if err := s.publisher.PublishConditions(spanCtx, conditions); err != nil {
 		logger.Error(ctx, "error publishing conditions", slog.Any("error", err))
 		return err
 	}

@@ -21,8 +21,10 @@ services:
     ports:
       - "${KAFKA_PORT}:${KAFKA_PORT}"
     environment:
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:${KAFKA_PORT}
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:${KAFKA_PORT}
+      KAFKA_ADVERTISED_LISTENERS: DOCKER://kafka:${KAFKA_PORT},HOST://localhost:${KAFKA_PORT}
+      KAFKA_LISTENERS: DOCKER://0.0.0.0:${KAFKA_PORT_EXT},HOST://0.0.0.0:${KAFKA_PORT}
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: DOCKER:PLAINTEXT,HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: DOCKER
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:${ZOOKEEPER_PORT}
       KAFKA_CREATE_TOPICS: "${KAFKA_WEATHER_TOPIC_NAME}:1:1"
     depends_on:
@@ -39,7 +41,14 @@ services:
       - "${KAFKA_UI_PORT}:${KAFKA_UI_PORT}"
     environment:
       KAFKA_CLUSTERS_0_NAME: local
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_PORT}
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:${KAFKA_PORT_EXT}
     depends_on:
       kafka:
         condition: service_healthy
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    container_name: upassed_form_service_jaeger
+    ports:
+      - "${JAEGER_UI_PORT}:${JAEGER_UI_PORT}"
+      - "${JAEGER_PORT}:${JAEGER_PORT}"
