@@ -75,11 +75,12 @@ func TestWeatherService_CollectData(t *testing.T) {
 	logger.InitLogger(logger.EnvTypeTesting, slog.LevelDebug)
 
 	tests := []struct {
-		name        string
-		config      func(ctrl *gomock.Controller) weather_service.Config
-		meteoClient func(ctrl *gomock.Controller) weather_service.MeteoClient
-		storage     func(ctrl *gomock.Controller) weather_service.Storage
-		wantErrFunc assert.ErrorAssertionFunc
+		name           string
+		config         func(ctrl *gomock.Controller) weather_service.Config
+		meteoClient    func(ctrl *gomock.Controller) weather_service.MeteoClient
+		storage        func(ctrl *gomock.Controller) weather_service.Storage
+		metricsManager func(ctrl *gomock.Controller) weather_service.MetricsManager
+		wantErrFunc    assert.ErrorAssertionFunc
 	}{
 		{
 			name: "happy path",
@@ -141,6 +142,14 @@ func TestWeatherService_CollectData(t *testing.T) {
 
 				return mock
 			},
+			metricsManager: func(ctrl *gomock.Controller) weather_service.MetricsManager {
+				mock := NewMockMetricsManager(ctrl)
+				mock.EXPECT().
+					AddMeteoClientDurationMetric(gomock.Any(), gomock.Any()).
+					Return()
+
+				return mock
+			},
 			wantErrFunc: assert.NoError,
 		},
 		{
@@ -199,6 +208,14 @@ func TestWeatherService_CollectData(t *testing.T) {
 						return nil
 					}).
 					Times(1)
+
+				return mock
+			},
+			metricsManager: func(ctrl *gomock.Controller) weather_service.MetricsManager {
+				mock := NewMockMetricsManager(ctrl)
+				mock.EXPECT().
+					AddMeteoClientDurationMetric(gomock.Any(), gomock.Any()).
+					Return()
 
 				return mock
 			},
@@ -264,6 +281,14 @@ func TestWeatherService_CollectData(t *testing.T) {
 
 				return mock
 			},
+			metricsManager: func(ctrl *gomock.Controller) weather_service.MetricsManager {
+				mock := NewMockMetricsManager(ctrl)
+				mock.EXPECT().
+					AddMeteoClientDurationMetric(gomock.Any(), gomock.Any()).
+					Return()
+
+				return mock
+			},
 			wantErrFunc: assert.Error,
 		},
 	}
@@ -278,6 +303,7 @@ func TestWeatherService_CollectData(t *testing.T) {
 				tt.meteoClient(ctrl),
 				nil,
 				tt.storage(ctrl),
+				tt.metricsManager(ctrl),
 			)
 
 			err := service.CollectData(context.Background())

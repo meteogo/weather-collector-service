@@ -30,7 +30,8 @@ func main() {
 		repositories = app.InitRepositories(ctx, provider)
 		clients      = app.InitClients()
 		publishers   = app.InitPublishers(ctx, provider)
-		services     = app.InitServices(provider, clients, publishers, repositories)
+		metrics      = app.InitMetrics(ctx)
+		services     = app.InitServices(provider, clients, publishers, repositories, metrics)
 		_            = app.InitSchedulers(ctx, provider, services)
 	)
 

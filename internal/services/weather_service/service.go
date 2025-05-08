@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"sync"
+	"time"
 
 	"github.com/meteogo/logger/pkg/logger"
 	"go.opentelemetry.io/otel"
@@ -31,19 +32,32 @@ type Storage interface {
 	GetConditions(ctx context.Context) (CityWeatherConditions, error)
 }
 
-type Service struct {
-	config      Config
-	meteoClient MeteoClient
-	publisher   Publisher
-	storage     Storage
+type MetricsManager interface {
+	AddMeteoClientDurationMetric(ctx context.Context, d time.Duration)
+	AddKafkaSendDurationMetric(ctx context.Context, d time.Duration)
 }
 
-func NewService(config Config, meteoClient MeteoClient, publisher Publisher, storage Storage) *Service {
+type Service struct {
+	config         Config
+	meteoClient    MeteoClient
+	publisher      Publisher
+	storage        Storage
+	metricsManager MetricsManager
+}
+
+func NewService(
+	config Config,
+	meteoClient MeteoClient,
+	publisher Publisher,
+	storage Storage,
+	metricsManager MetricsManager,
+) *Service {
 	return &Service{
-		config:      config,
-		meteoClient: meteoClient,
-		publisher:   publisher,
-		storage:     storage,
+		config:         config,
+		meteoClient:    meteoClient,
+		publisher:      publisher,
+		storage:        storage,
+		metricsManager: metricsManager,
 	}
 }
 
@@ -51,7 +65,10 @@ func (s *Service) CollectData(ctx context.Context) error {
 	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.CollectData]", s))
 	defer span.End()
 
+	collectStart := time.Now()
 	conditions := s.collectDataFromClient(spanCtx)
+	s.metricsManager.AddMeteoClientDurationMetric(ctx, time.Since(collectStart))
+
 	if err := s.storage.SaveConditions(spanCtx, conditions); err != nil {
 		return err
 	}
@@ -136,11 +153,13 @@ func (s *Service) SendData(ctx context.Context) error {
 		return err
 	}
 
+	publishStart := time.Now()
 	if err := s.publisher.PublishConditions(spanCtx, conditions); err != nil {
 		logger.Error(ctx, "error publishing conditions", slog.Any("error", err))
 		return err
 	}
 
+	s.metricsManager.AddKafkaSendDurationMetric(ctx, time.Since(publishStart))
 	logger.Info(ctx, "weather conditions published successfully")
 	return nil
 }

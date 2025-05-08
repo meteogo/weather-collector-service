@@ -44,6 +44,10 @@ func (c *Cron) Start(ctx context.Context) {
 
 func (c *Cron) Do(ctx context.Context) {
 	start := time.Now()
+	defer func() {
+		logger.Info(ctx, "successfully done weather sending job", slog.String("timeEstimated", time.Since(start).String()))
+	}()
+
 	spanCtx, span := otel.Tracer("").Start(ctx, fmt.Sprintf("[%T.Do]", c))
 	defer span.End()
 
@@ -51,8 +55,6 @@ func (c *Cron) Do(ctx context.Context) {
 		logger.Error(ctx, "error in weather sender cron tick", slog.Any("error", err))
 		return
 	}
-
-	logger.Info(ctx, "successfully done weather sending job", slog.String("timeEstimated", time.Since(start).String()))
 }
 
 func (c *Cron) Stop(ctx context.Context) {

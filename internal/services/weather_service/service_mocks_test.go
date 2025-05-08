@@ -12,6 +12,7 @@ package weather_service_test
 import (
 	context "context"
 	reflect "reflect"
+	time "time"
 
 	weather_service "github.com/meteogo/weather-collector-service/internal/services/weather_service"
 	gomock "go.uber.org/mock/gomock"
@@ -377,6 +378,102 @@ func (c *MockStorageSaveConditionsCall) Do(f func(context.Context, weather_servi
 
 // DoAndReturn rewrite *gomock.Call.DoAndReturn
 func (c *MockStorageSaveConditionsCall) DoAndReturn(f func(context.Context, weather_service.CityWeatherConditions) error) *MockStorageSaveConditionsCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// MockMetricsManager is a mock of MetricsManager interface.
+type MockMetricsManager struct {
+	ctrl     *gomock.Controller
+	recorder *MockMetricsManagerMockRecorder
+	isgomock struct{}
+}
+
+// MockMetricsManagerMockRecorder is the mock recorder for MockMetricsManager.
+type MockMetricsManagerMockRecorder struct {
+	mock *MockMetricsManager
+}
+
+// NewMockMetricsManager creates a new mock instance.
+func NewMockMetricsManager(ctrl *gomock.Controller) *MockMetricsManager {
+	mock := &MockMetricsManager{ctrl: ctrl}
+	mock.recorder = &MockMetricsManagerMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockMetricsManager) EXPECT() *MockMetricsManagerMockRecorder {
+	return m.recorder
+}
+
+// AddKafkaSendDurationMetric mocks base method.
+func (m *MockMetricsManager) AddKafkaSendDurationMetric(ctx context.Context, d time.Duration) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddKafkaSendDurationMetric", ctx, d)
+}
+
+// AddKafkaSendDurationMetric indicates an expected call of AddKafkaSendDurationMetric.
+func (mr *MockMetricsManagerMockRecorder) AddKafkaSendDurationMetric(ctx, d any) *MockMetricsManagerAddKafkaSendDurationMetricCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddKafkaSendDurationMetric", reflect.TypeOf((*MockMetricsManager)(nil).AddKafkaSendDurationMetric), ctx, d)
+	return &MockMetricsManagerAddKafkaSendDurationMetricCall{Call: call}
+}
+
+// MockMetricsManagerAddKafkaSendDurationMetricCall wrap *gomock.Call
+type MockMetricsManagerAddKafkaSendDurationMetricCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockMetricsManagerAddKafkaSendDurationMetricCall) Return() *MockMetricsManagerAddKafkaSendDurationMetricCall {
+	c.Call = c.Call.Return()
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockMetricsManagerAddKafkaSendDurationMetricCall) Do(f func(context.Context, time.Duration)) *MockMetricsManagerAddKafkaSendDurationMetricCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockMetricsManagerAddKafkaSendDurationMetricCall) DoAndReturn(f func(context.Context, time.Duration)) *MockMetricsManagerAddKafkaSendDurationMetricCall {
+	c.Call = c.Call.DoAndReturn(f)
+	return c
+}
+
+// AddMeteoClientDurationMetric mocks base method.
+func (m *MockMetricsManager) AddMeteoClientDurationMetric(ctx context.Context, d time.Duration) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddMeteoClientDurationMetric", ctx, d)
+}
+
+// AddMeteoClientDurationMetric indicates an expected call of AddMeteoClientDurationMetric.
+func (mr *MockMetricsManagerMockRecorder) AddMeteoClientDurationMetric(ctx, d any) *MockMetricsManagerAddMeteoClientDurationMetricCall {
+	mr.mock.ctrl.T.Helper()
+	call := mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddMeteoClientDurationMetric", reflect.TypeOf((*MockMetricsManager)(nil).AddMeteoClientDurationMetric), ctx, d)
+	return &MockMetricsManagerAddMeteoClientDurationMetricCall{Call: call}
+}
+
+// MockMetricsManagerAddMeteoClientDurationMetricCall wrap *gomock.Call
+type MockMetricsManagerAddMeteoClientDurationMetricCall struct {
+	*gomock.Call
+}
+
+// Return rewrite *gomock.Call.Return
+func (c *MockMetricsManagerAddMeteoClientDurationMetricCall) Return() *MockMetricsManagerAddMeteoClientDurationMetricCall {
+	c.Call = c.Call.Return()
+	return c
+}
+
+// Do rewrite *gomock.Call.Do
+func (c *MockMetricsManagerAddMeteoClientDurationMetricCall) Do(f func(context.Context, time.Duration)) *MockMetricsManagerAddMeteoClientDurationMetricCall {
+	c.Call = c.Call.Do(f)
+	return c
+}
+
+// DoAndReturn rewrite *gomock.Call.DoAndReturn
+func (c *MockMetricsManagerAddMeteoClientDurationMetricCall) DoAndReturn(f func(context.Context, time.Duration)) *MockMetricsManagerAddMeteoClientDurationMetricCall {
 	c.Call = c.Call.DoAndReturn(f)
 	return c
 }
